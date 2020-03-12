@@ -49,6 +49,12 @@ namespace Xylo
             jumper           = 0;
             time             = 0;
             note             = 0;
+
+            // Initialize elements in the listbox
+            defaultSongListBox.Items.Add("Estrellita");
+            defaultSongListBox.Items.Add("Star Wars");
+            defaultSongListBox.Items.Add("La Cucaracha");
+            defaultSongListBox.Items.Add("Himno Alegría");
         }
 
         private void button1Press()
@@ -124,6 +130,7 @@ namespace Xylo
             time = 0;
             isFirstStroke = true;
             buttonSend.Enabled = false;
+            buttonPlay.Enabled = false;
         }
 
         private void buttonTerminate_Click(object sender, EventArgs e)
@@ -162,6 +169,12 @@ namespace Xylo
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            // Space can be used to finish recording a song
+            if (e.KeyCode == Keys.Space)
+            {
+                buttonTerminate.PerformClick();
+                return;
+            }
             if (isFirstStroke)
             {
                 // Start the timer on the first note
@@ -197,7 +210,6 @@ namespace Xylo
                 case Keys.J: button7Press(); note = 7; break;
                 case Keys.K: button8Press(); note = 8; break;
                 case Keys.L: button9Press(); note = 9; break;
-                case Keys.Space: buttonTerminate.PerformClick(); break;
             }
         }
 
@@ -207,20 +219,43 @@ namespace Xylo
             time++;
         }
 
-        private void buttonSend_Click(object sender, EventArgs e)
+        private async void buttonSend_Click(object sender, EventArgs e)
         {
-            byte[,] byteArr = new byte[song.Count, 2];
-            byte noteByte;
-            byte delayByte;
-            int i = 0;
+            // A string will be sent to the Arduino containing the song in the following format: N|n1,t1|...|nm,tm|
+            // where N is the length of the song, nk is a note and tk is a time delay.
+            // First element is N: the length of the song.
+            string songString = $"{song.Count}|";
+            // Next elements will be |nk,tk|: the (note, delay) pairs. 
             foreach (var noteArr in song)
             {
-                noteByte = Convert.ToByte(noteArr[0]);
-                delayByte = Convert.ToByte(noteArr[1]);
-                byteArr[i, 0] = noteByte;
-                byteArr[i, 1] = delayByte;
-                MessageBox.Show($"{byteArr[i, 0]}, {byteArr[i, 1]}");
+                songString += $"{noteArr[0]},{noteArr[1]}|";
             }
+            songTextBox.Text = "Personalizada";
+            buttonPlay.Enabled = true;
+            //arduinoPort.Write(songString);
+            // Disable the form while waiting for the send of the song to the Arduino
+            Enabled = false;
+            await Task.Delay(3000);
+            MessageBox.Show($"Canción Personalizada enviada al Arduino");
+            Enabled = true;
+        }
+
+        private async void defaultSongListBox_DoubleClick(object sender, EventArgs e)
+        {
+            string selected = defaultSongListBox.SelectedItem.ToString();
+            //arduinoPort.Write(selected);
+            // Disable the form while waiting for the send of the song to the Arduino
+            Enabled = false;
+            await Task.Delay(3000);
+            songTextBox.Text = selected;
+            MessageBox.Show($"Canción {selected} enviada al Arduino");
+            Enabled = true;
+            buttonPlay.Enabled = true;
+        }
+
+        private void buttonPlay_Click(object sender, EventArgs e)
+        {
+            arduinoPort.Write("play");
         }
     }
 }

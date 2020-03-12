@@ -44,6 +44,11 @@
             this.labelSequenceIndicator = new System.Windows.Forms.Label();
             this.labelSequence = new System.Windows.Forms.Label();
             this.buttonSend = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.songTextBox = new System.Windows.Forms.TextBox();
+            this.defaultSongListBox = new System.Windows.Forms.ListBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.buttonPlay = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -191,11 +196,62 @@
             this.buttonSend.UseVisualStyleBackColor = true;
             this.buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(601, 305);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(103, 13);
+            this.label1.TabIndex = 14;
+            this.label1.Text = "Canción en Arduino:";
+            // 
+            // songTextBox
+            // 
+            this.songTextBox.Location = new System.Drawing.Point(604, 322);
+            this.songTextBox.Name = "songTextBox";
+            this.songTextBox.Size = new System.Drawing.Size(126, 20);
+            this.songTextBox.TabIndex = 15;
+            this.songTextBox.Text = "Ninguna";
+            // 
+            // defaultSongListBox
+            // 
+            this.defaultSongListBox.FormattingEnabled = true;
+            this.defaultSongListBox.Location = new System.Drawing.Point(604, 49);
+            this.defaultSongListBox.Name = "defaultSongListBox";
+            this.defaultSongListBox.Size = new System.Drawing.Size(120, 225);
+            this.defaultSongListBox.TabIndex = 16;
+            this.defaultSongListBox.DoubleClick += new System.EventHandler(this.defaultSongListBox_DoubleClick);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(604, 30);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(142, 13);
+            this.label2.TabIndex = 17;
+            this.label2.Text = "Canciones pre-programadas:";
+            // 
+            // buttonPlay
+            // 
+            this.buttonPlay.Enabled = false;
+            this.buttonPlay.Location = new System.Drawing.Point(748, 320);
+            this.buttonPlay.Name = "buttonPlay";
+            this.buttonPlay.Size = new System.Drawing.Size(115, 23);
+            this.buttonPlay.TabIndex = 18;
+            this.buttonPlay.Text = "Tocar canción";
+            this.buttonPlay.UseVisualStyleBackColor = true;
+            this.buttonPlay.Click += new System.EventHandler(this.buttonPlay_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(898, 499);
+            this.Controls.Add(this.buttonPlay);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.defaultSongListBox);
+            this.Controls.Add(this.songTextBox);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonSend);
             this.Controls.Add(this.labelSequence);
             this.Controls.Add(this.labelSequenceIndicator);
@@ -236,6 +292,11 @@
         private System.Windows.Forms.Label labelSequenceIndicator;
         private System.Windows.Forms.Label labelSequence;
         private System.Windows.Forms.Button buttonSend;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox songTextBox;
+        private System.Windows.Forms.ListBox defaultSongListBox;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button buttonPlay;
     }
 }
 
