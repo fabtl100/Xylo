@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 using System.IO;
+using System.IO.Ports;
 using System.Threading;
 
 
@@ -31,7 +32,7 @@ namespace Xylo
         // isArduinoPlaying is used to know if Arduino is currently playing a song
         bool isArduinoPlaying;
         // arduinoPort is a reference to the serial port object to make the connection and send messages to the Arduino
-        System.IO.Ports.SerialPort arduinoPort;
+        SerialPort arduinoPort;
 
         public Form1()
         {
@@ -43,9 +44,11 @@ namespace Xylo
             // Configure the connection through the serial port to the Arduino
             arduinoPort          = new System.IO.Ports.SerialPort();
             arduinoPort.PortName = "COM";
-            arduinoPort.BaudRate = 9600;            
+            arduinoPort.BaudRate = 9600;
+            arduinoPort.RtsEnable = true;
+            arduinoPort.DataReceived += new SerialDataReceivedEventHandler(dataReceived);
             // Connect to the Arduino
-            //arduinoPort.Open();
+            arduinoPort.Open();
             
             // Initialize some variables
             song             = new List<int[]>();
@@ -56,10 +59,11 @@ namespace Xylo
             isArduinoPlaying = false;
 
             // Initialize elements in the listbox
+            defaultSongListBox.Items.Add("Prueba");
             defaultSongListBox.Items.Add("Estrellita");
             defaultSongListBox.Items.Add("Star Wars");
             defaultSongListBox.Items.Add("La Cucaracha");
-            defaultSongListBox.Items.Add("Himno Alegría");
+            defaultSongListBox.Items.Add("Himno Alegria");
         }
 
         // This button restarts the state of all variables so a new song can be played, saved and sent
@@ -236,7 +240,7 @@ namespace Xylo
             songTextBox.Text = "Personalizada";
             buttonPlay.Enabled = true;
             // Send the song to the Arduino
-            //arduinoPort.Write(songString);
+            arduinoPort.Write(songString);
 
             // Disable the form while waiting for the send of the song to the Arduino
             Enabled = false;
@@ -250,7 +254,7 @@ namespace Xylo
         {
             string selected = defaultSongListBox.SelectedItem.ToString();
             // Write the song to the Arduino
-            //arduinoPort.Write(selected);
+            arduinoPort.Write(selected);
             // Disable the form while waiting for the send of the song to the Arduino
             Enabled = false;
             // Wait for message to be sent, this may need to be adjusted
@@ -266,14 +270,21 @@ namespace Xylo
         {
             if (isArduinoPlaying)
             {
-                //arduinoPort.Write("stop");
+                arduinoPort.Write("stop");
                 buttonPlay.Text = "Tocar";
             } else
             {
-                //arduinoPort.Write("play");
+                arduinoPort.Write("play");
                 buttonPlay.Text = "Detener";
             }
             isArduinoPlaying = !isArduinoPlaying;
+        }
+
+        private void dataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            SerialPort arduinoSenderPort = (SerialPort)sender;
+            string data = arduinoSenderPort.ReadLine();
+            MessageBox.Show($"Recibido: {data}");
         }
     }
 }
