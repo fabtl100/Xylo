@@ -28,7 +28,9 @@ namespace Xylo
         int jumper;
         // note holds the played note at a certain time
         int note;
-        // 
+        // isArduinoPlaying is used to know if Arduino is currently playing a song
+        bool isArduinoPlaying;
+        // arduinoPort is a reference to the serial port object to make the connection and send messages to the Arduino
         System.IO.Ports.SerialPort arduinoPort;
 
         public Form1()
@@ -37,18 +39,21 @@ namespace Xylo
             
             // project directory is needed to access the sounds for each note
             projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;            
-            // Configurate the connection through the serial port to the Arduino
+            
+            // Configure the connection through the serial port to the Arduino
             arduinoPort          = new System.IO.Ports.SerialPort();
             arduinoPort.PortName = "COM";
-            arduinoPort.BaudRate = 9600;
+            arduinoPort.BaudRate = 9600;            
             // Connect to the Arduino
             //arduinoPort.Open();
+            
             // Initialize some variables
             song             = new List<int[]>();
             isFirstStroke    = true;
             jumper           = 0;
             time             = 0;
             note             = 0;
+            isArduinoPlaying = false;
 
             // Initialize elements in the listbox
             defaultSongListBox.Items.Add("Estrellita");
@@ -57,69 +62,7 @@ namespace Xylo
             defaultSongListBox.Items.Add("Himno Alegría");
         }
 
-        private void button1Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\1.wav");
-            player.Play();
-            labelSequence.Text += "{Ab";
-        }
-
-        private void button2Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\2.wav");
-            player.Play();
-            labelSequence.Text += "{Bb";
-        }
-
-        private void button3Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\3.wav");
-            player.Play();
-            labelSequence.Text += "{C";
-        }
-
-        private void button4Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\4.wav");
-            player.Play();
-            labelSequence.Text += "{Db";
-        }
-
-        private void button5Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\5.wav");
-            player.Play();
-            labelSequence.Text += "{Eb";
-        }
-
-        private void button6Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\6.wav");
-            player.Play();
-            labelSequence.Text += "{F";
-        }
-
-        private void button7Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\7.wav");
-            player.Play();
-            labelSequence.Text += "{G";
-        }
-
-        private void button8Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\8.wav");
-            player.Play();
-            labelSequence.Text += "{Ab";
-        }
-
-        private void button9Press()
-        {
-            SoundPlayer player = new SoundPlayer($"{projectDirectory}\\9.wav");
-            player.Play();
-            labelSequence.Text += "{Bb";
-        }
-
+        // This button restarts the state of all variables so a new song can be played, saved and sent
         private void buttonStart_Click(object sender, EventArgs e)
         {
             // Set all vars to their default to start with a new song
@@ -133,19 +76,28 @@ namespace Xylo
             buttonPlay.Enabled = false;
         }
 
+        // This button ends the timer for the intervals between sequences and sets the state
+        // for the song to be sent to the Arduino
         private void buttonTerminate_Click(object sender, EventArgs e)
         {
             if (timer1.Enabled)
             {
+                // Finish the song sequence logic: Stop timer, add the last note
+                // with its interval and add the last chars to the song sequence label
                 timer1.Stop();
                 song.Add(new int[] { note, time });
                 labelSequence.Text += $",{time}}}]";
+                
+                // This logic is used to start a new line in the song sequence label
                 jumper++;
                 if (jumper == 10)
                 {
                     labelSequence.Text += "\n";
                     jumper = 0;
                 }
+
+                // Play the song and set the state for a new song to be played
+                // and for this song to be sent to the Arduino
                 play();
                 time = 0;
                 isFirstStroke = true;
@@ -153,10 +105,16 @@ namespace Xylo
             }
             else
             {
+                // If the song has been terminated already we just play the song again
+                // when this button is clicked
                 play();
             }
         }
 
+        // Play the saved song
+        // The delay has a constant being multiplied by the interval to be waited for
+        // this was done by trial and error, couldn't decipher why the intervals where not
+        // waited in the exact time given to the Task.Delay() method
         private async void play()
         {
             foreach (int[] noteArr in song)
@@ -167,6 +125,7 @@ namespace Xylo
             }
         }
 
+        // Detect Keyboard pressing. Here the logic for the note playing is handled
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             // Space can be used to finish recording a song
@@ -189,27 +148,70 @@ namespace Xylo
                 song.Add(new int[] { note, time });
                 // Add the note with its delay to the label showing the sequence
                 labelSequence.Text += $",{time}}}, ";
+                
+                // This logic is used to start a new line in the song sequence label
                 jumper++;
-                // After then notes a line jump is performed so sequence can continue 
                 if (jumper == 10)
                 {
                     labelSequence.Text += "\n";
                     jumper = 0;
                 }
+
+                // Restart timer to count a new interval between the recently played note and the next one
                 time = 0;
                 timer1.Start();
             }
+
+            // Depending on the key being pressed the corresponding note is played
+            // and added to the song sequence label
+            SoundPlayer player;
             switch (e.KeyCode)
             {
-                case Keys.A: button1Press(); note = 1; break;
-                case Keys.S: button2Press(); note = 2; break;
-                case Keys.D: button3Press(); note = 3; break;
-                case Keys.F: button4Press(); note = 4; break;
-                case Keys.G: button5Press(); note = 5; break;
-                case Keys.H: button6Press(); note = 6; break;
-                case Keys.J: button7Press(); note = 7; break;
-                case Keys.K: button8Press(); note = 8; break;
-                case Keys.L: button9Press(); note = 9; break;
+                case Keys.A: 
+                    player = new SoundPlayer($"{projectDirectory}\\1.wav");
+                    player.Play();
+                    labelSequence.Text += "{Ab"; 
+                    note = 1; break;
+                case Keys.S: 
+                    player = new SoundPlayer($"{projectDirectory}\\2.wav");
+                    player.Play();
+                    labelSequence.Text += "{Bb"; 
+                    note = 2; break;
+                case Keys.D: 
+                    player = new SoundPlayer($"{projectDirectory}\\3.wav");
+                    player.Play();
+                    labelSequence.Text += "{C"; 
+                    note = 3; break;
+                case Keys.F:
+                    player = new SoundPlayer($"{projectDirectory}\\4.wav");
+                    player.Play();
+                    labelSequence.Text += "{Db";
+                    note = 4; break;
+                case Keys.G:
+                    player = new SoundPlayer($"{projectDirectory}\\5.wav");
+                    player.Play();
+                    labelSequence.Text += "{Eb";
+                    note = 5; break;
+                case Keys.H:
+                    player = new SoundPlayer($"{projectDirectory}\\6.wav");
+                    player.Play();
+                    labelSequence.Text += "{F";
+                    note = 6; break;
+                case Keys.J:
+                    player = new SoundPlayer($"{projectDirectory}\\7.wav");
+                    player.Play();
+                    labelSequence.Text += "{G";
+                    note = 7; break;
+                case Keys.K:
+                    player = new SoundPlayer($"{projectDirectory}\\8.wav");
+                    player.Play();
+                    labelSequence.Text += "{Ab";
+                    note = 8; break;
+                case Keys.L:
+                    player = new SoundPlayer($"{projectDirectory}\\9.wav");
+                    player.Play();
+                    labelSequence.Text += "{Bb";
+                    note = 9; break;
             }
         }
 
@@ -225,6 +227,7 @@ namespace Xylo
             // where N is the length of the song, nk is a note and tk is a time delay.
             // First element is N: the length of the song.
             string songString = $"{song.Count}|";
+
             // Next elements will be |nk,tk|: the (note, delay) pairs. 
             foreach (var noteArr in song)
             {
@@ -232,9 +235,12 @@ namespace Xylo
             }
             songTextBox.Text = "Personalizada";
             buttonPlay.Enabled = true;
+            // Send the song to the Arduino
             //arduinoPort.Write(songString);
+
             // Disable the form while waiting for the send of the song to the Arduino
             Enabled = false;
+            // Wait for message to be sent, this may need to be adjusted
             await Task.Delay(3000);
             MessageBox.Show($"Canción Personalizada enviada al Arduino");
             Enabled = true;
@@ -243,9 +249,11 @@ namespace Xylo
         private async void defaultSongListBox_DoubleClick(object sender, EventArgs e)
         {
             string selected = defaultSongListBox.SelectedItem.ToString();
+            // Write the song to the Arduino
             //arduinoPort.Write(selected);
             // Disable the form while waiting for the send of the song to the Arduino
             Enabled = false;
+            // Wait for message to be sent, this may need to be adjusted
             await Task.Delay(3000);
             songTextBox.Text = selected;
             MessageBox.Show($"Canción {selected} enviada al Arduino");
@@ -253,9 +261,19 @@ namespace Xylo
             buttonPlay.Enabled = true;
         }
 
+        // Send a message to the Arduino asking him to start playing the given song
         private void buttonPlay_Click(object sender, EventArgs e)
         {
-            arduinoPort.Write("play");
+            if (isArduinoPlaying)
+            {
+                //arduinoPort.Write("stop");
+                buttonPlay.Text = "Tocar";
+            } else
+            {
+                //arduinoPort.Write("play");
+                buttonPlay.Text = "Detener";
+            }
+            isArduinoPlaying = !isArduinoPlaying;
         }
     }
 }
