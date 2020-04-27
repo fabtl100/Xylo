@@ -17,6 +17,52 @@ namespace Xylo
 {
     public partial class Form1 : Form
     {
+        // Pre-defined songs
+        List<int[]> prueba = new List<int[]>() {
+            new int[2]{1,500}, new int[2]{2,500}, new int[2]{3,500}, new int[2]{4,500},
+            new int[2]{5,500}, new int[2]{6,500}, new int[2]{7,500}, new int[2]{8,500}, new int[2]{9,500}
+        };
+        List<int[]> starWars = new List<int[]>() {
+            new int[2]{1,1000},new int[2]{5,1000},new int[2]{4,500},new int[2]{3,500},
+            new int[2]{2,500},new int[2]{8,1000},new int[2]{5,1000},new int[2]{4,500},new int[2]{3,500},
+            new int[2]{2,500},new int[2]{8,1000},new int[2]{5,1000},new int[2]{4,500},new int[2]{3,500},
+            new int[2]{4,500},new int[2]{2,500}
+        };
+
+        List<int[]> cucaracha = new List<int[]>() {
+            new int[2]{1,333},new int[2]{1,333},new int[2]{1,334},new int[2]{4,1000},
+            new int[2]{6,1000},new int[2]{1,333},new int[2]{1,333},new int[2]{1,334},new int[2]{4,1000},
+            new int[2]{ 6,1000},new int[2]{4,500},new int[2]{4,500},new int[2]{3,500},new int[2]{3,500},
+            new int[2]{ 2,500},new int[2]{2,500},new int[2]{1,1000},new int[2]{1,333},new int[2]{1,333},
+            new int[2]{ 1,334},new int[2]{3,1000},new int[2]{5,1000},new int[2]{1,333},new int[2]{1,333},
+            new int[2]{ 1,334},new int[2]{3,1000},new int[2]{5,1000},new int[2]{8,500},new int[2]{9,500},
+            new int[2]{8,500},new int[2]{7,500},new int[2]{6,500},new int[2]{5,500},new int[2]{4,500}
+        };
+        List<int[]> himnoAlegria = new List<int[]> {
+            new int[2]{3,500},new int[2]{3,500},new int[2]{4,500},new int[2]{5,500},
+            new int[2]{ 5,500},new int[2]{4,500},new int[2]{3,500},new int[2]{2,500},new int[2]{1,500},
+            new int[2]{ 1,500},new int[2]{2,500},new int[2]{3,500},new int[2]{3,750},new int[2]{2,300},
+            new int[2]{ 2,1000},new int[2]{3,500},new int[2]{3,500},new int[2]{4,500},new int[2]{5,500},
+            new int[2]{ 5,500},new int[2]{4,500},new int[2]{3,500},new int[2]{2,500},new int[2]{1,500},
+            new int[2]{ 1,500},new int[2]{2,500},new int[2]{3,500},new int[2]{2,750},new int[2]{1,300},
+            new int[2]{ 1,1000},new int[2]{2,1000},new int[2]{3,500},new int[2]{1,500},new int[2]{2,500},
+            new int[2]{ 3,300},new int[2]{4,300},new int[2]{3,500},new int[2]{1,500},new int[2]{2,500},
+            new int[2]{ 3,300},new int[2]{4,300},new int[2]{3,500},new int[2]{2,500},new int[2]{1,500},
+            new int[2]{ 2,500},new int[2]{5,500},new int[2]{3,1000},new int[2]{3,500},new int[2]{4,500},
+            new int[2]{ 5,500},new int[2]{5,500},new int[2]{4,500},new int[2]{3,500},new int[2]{2,500},
+            new int[2]{ 1 ,500},new int[2]{1,500},new int[2]{2,500},new int[2]{3,500},new int[2]{2,750},
+            new int[2]{1,300},new int[2]{1,2000}};
+        List<int[]> estrellita = new List<int[]> {
+            new int[2]{1,500},new int[2]{1,500},new int[2]{5,500},new int[2]{5,500},
+            new int[2]{ 6,500},new int[2]{6,500},new int[2]{5,1000},new int[2]{4,500},new int[2]{4,500},
+            new int[2]{ 3,500},new int[2]{3,500},new int[2]{2,500},new int[2]{2,500},new int[2]{1,1000},
+            new int[2]{ 5,500},new int[2]{5,500},new int[2]{4,500},new int[2]{4,500},new int[2]{3,500},
+            new int[2]{ 3,500},new int[2]{2,1000},new int[2]{5,500},new int[2]{5,500},new int[2]{4,500},
+            new int[2]{ 4,500},new int[2]{3,500},new int[2]{3,500},new int[2]{2,1000},new int[2]{1,500},
+            new int[2]{ 1,500},new int[2]{5,500},new int[2]{5,500},new int[2]{6,500},new int[2]{6,500},
+            new int[2]{ 5,1000},new int[2]{4,500},new int[2]{4,500},new int[2]{3,500},new int[2]{3,500},
+            new int[2]{ 2,500},new int[2]{2,500},new int[2]{1,1000}};
+
         // song will hold the arrays holding the note and the duration of the note
         List<int[]> song;
         // projectDirectory is the path in the computer where the sounds for each note are saved
@@ -42,11 +88,10 @@ namespace Xylo
             projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;            
             
             // Configure the connection through the serial port to the Arduino
-            arduinoPort          = new System.IO.Ports.SerialPort();
-            arduinoPort.PortName = "COM";
+            arduinoPort          = new SerialPort();
+            arduinoPort.PortName = "COM1";
             arduinoPort.BaudRate = 9600;
             arduinoPort.RtsEnable = true;
-            arduinoPort.DataReceived += new SerialDataReceivedEventHandler(dataReceived);
             // Connect to the Arduino
             arduinoPort.Open();
             
@@ -89,8 +134,8 @@ namespace Xylo
                 // Finish the song sequence logic: Stop timer, add the last note
                 // with its interval and add the last chars to the song sequence label
                 timer1.Stop();
-                song.Add(new int[] { note, time });
-                labelSequence.Text += $",{time}}}]";
+                song.Add(new int[] { note, time*10 });
+                labelSequence.Text += $",{time*10}}}]";
                 
                 // This logic is used to start a new line in the song sequence label
                 jumper++;
@@ -125,7 +170,7 @@ namespace Xylo
             {
                 SoundPlayer player = new SoundPlayer($"{projectDirectory}\\{noteArr[0]}.wav");
                 player.Play();
-                await Task.Delay(noteArr[1]*14);
+                await Task.Delay((noteArr[1]/10)*14);
             }
         }
 
@@ -133,7 +178,7 @@ namespace Xylo
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             // Space can be used to finish recording a song
-            if (e.KeyCode == Keys.Space)
+            if (e.KeyCode == Keys.Z)
             {
                 buttonTerminate.PerformClick();
                 return;
@@ -149,9 +194,9 @@ namespace Xylo
             {
                 timer1.Stop();
                 // Add the note with its delay to the song list
-                song.Add(new int[] { note, time });
+                song.Add(new int[] { note, time*10 });
                 // Add the note with its delay to the label showing the sequence
-                labelSequence.Text += $",{time}}}, ";
+                labelSequence.Text += $",{time*10}}}, ";
                 
                 // This logic is used to start a new line in the song sequence label
                 jumper++;
@@ -253,8 +298,29 @@ namespace Xylo
         private async void defaultSongListBox_DoubleClick(object sender, EventArgs e)
         {
             string selected = defaultSongListBox.SelectedItem.ToString();
+            List<int[]> songToSend = new List<int[]>();
+
+            switch (selected)
+            {
+                case "Himno Alegria": songToSend = himnoAlegria; break;
+                case "La Cucaracha" : songToSend = cucaracha; break;
+                case "Estrellita"   : songToSend = estrellita; break;
+                case "Star Wars"    : songToSend = starWars; break;
+                case "Prueba"       : songToSend = prueba; break;
+            }
+            // A string will be sent to the Arduino containing the song in the following format: N|n1,t1|...|nm,tm|
+            // where N is the length of the song, nk is a note and tk is a time delay.
+            // First element is N: the length of the song.
+            string songString = $"{songToSend.Count}|";
+
+            // Next elements will be |nk,tk|: the (note, delay) pairs. 
+            foreach (var noteArr in songToSend)
+            {
+                songString += $"{noteArr[0]},{noteArr[1]}|";
+            }
+
             // Write the song to the Arduino
-            arduinoPort.Write(selected);
+            arduinoPort.Write(songString);
             // Disable the form while waiting for the send of the song to the Arduino
             Enabled = false;
             // Wait for message to be sent, this may need to be adjusted
@@ -278,13 +344,6 @@ namespace Xylo
                 buttonPlay.Text = "Detener";
             }
             isArduinoPlaying = !isArduinoPlaying;
-        }
-
-        private void dataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            SerialPort arduinoSenderPort = (SerialPort)sender;
-            string data = arduinoSenderPort.ReadLine();
-            MessageBox.Show($"Recibido: {data}");
         }
     }
 }
