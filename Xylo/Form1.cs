@@ -71,12 +71,12 @@ namespace Xylo
         bool isFirstStroke;
         // time saves the time in ms counted by the timer between strokes
         int time;
+        // dateTime is used to calculate time elapsed between timer start and each tick
+        DateTime dateTime;
         // Counter used to jump the line in the label that saves the played notes
         int jumper;
         // note holds the played note at a certain time
         int note;
-        // isArduinoPlaying is used to know if Arduino is currently playing a song
-        bool isArduinoPlaying;
         // arduinoPort is a reference to the serial port object to make the connection and send messages to the Arduino
         SerialPort arduinoPort;
 
@@ -101,7 +101,6 @@ namespace Xylo
             jumper           = 0;
             time             = 0;
             note             = 0;
-            isArduinoPlaying = false;
 
             // Initialize elements in the listbox
             defaultSongListBox.Items.Add("Prueba");
@@ -133,12 +132,12 @@ namespace Xylo
                 // Finish the song sequence logic: Stop timer, add the last note
                 // with its interval and add the last chars to the song sequence label
                 timer1.Stop();
-                song.Add(new int[] { note, time*10 });
-                labelSequence.Text += $",{time*10}}}]";
+                song.Add(new int[] { note, time });
+                labelSequence.Text += $",{time}}}]";
                 
                 // This logic is used to start a new line in the song sequence label
                 jumper++;
-                if (jumper == 10)
+                if (jumper == 5)
                 {
                     labelSequence.Text += "\n";
                     jumper = 0;
@@ -169,7 +168,7 @@ namespace Xylo
             {
                 SoundPlayer player = new SoundPlayer($"{projectDirectory}\\{noteArr[0]}.wav");
                 player.Play();
-                await Task.Delay((noteArr[1]/10)*14);
+                await Task.Delay(noteArr[1]);
             }
         }
 
@@ -186,6 +185,7 @@ namespace Xylo
             {
                 // Start the timer on the first note
                 timer1.Start();
+                dateTime = DateTime.Now;
                 isFirstStroke = false;
                 labelSequence.Text += "[";
             }
@@ -193,13 +193,13 @@ namespace Xylo
             {
                 timer1.Stop();
                 // Add the note with its delay to the song list
-                song.Add(new int[] { note, time*10 });
+                song.Add(new int[] { note, time });
                 // Add the note with its delay to the label showing the sequence
-                labelSequence.Text += $",{time*10}}}, ";
+                labelSequence.Text += $",{time}}}, ";
                 
                 // This logic is used to start a new line in the song sequence label
                 jumper++;
-                if (jumper == 10)
+                if (jumper == 5)
                 {
                     labelSequence.Text += "\n";
                     jumper = 0;
@@ -208,6 +208,7 @@ namespace Xylo
                 // Restart timer to count a new interval between the recently played note and the next one
                 time = 0;
                 timer1.Start();
+                dateTime = DateTime.Now;
             }
 
             // Depending on the key being pressed the corresponding note is played
@@ -266,7 +267,8 @@ namespace Xylo
         // Increment time delay variable every millisecond the timer is enabled
         private void timer1_Tick(object sender, EventArgs e)
         {
-            time++;
+            TimeSpan timeElapsed = DateTime.Now - dateTime;
+            time = (int) timeElapsed.TotalMilliseconds;
         }
 
         private async void buttonSend_Click(object sender, EventArgs e)
