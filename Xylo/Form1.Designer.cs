@@ -48,7 +48,6 @@
             this.songTextBox = new System.Windows.Forms.TextBox();
             this.defaultSongListBox = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.buttonPlay = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -231,23 +230,11 @@
             this.label2.TabIndex = 17;
             this.label2.Text = "Canciones pre-programadas:";
             // 
-            // buttonPlay
-            // 
-            this.buttonPlay.Enabled = false;
-            this.buttonPlay.Location = new System.Drawing.Point(748, 320);
-            this.buttonPlay.Name = "buttonPlay";
-            this.buttonPlay.Size = new System.Drawing.Size(115, 23);
-            this.buttonPlay.TabIndex = 18;
-            this.buttonPlay.Text = "Tocar canción";
-            this.buttonPlay.UseVisualStyleBackColor = true;
-            this.buttonPlay.Click += new System.EventHandler(this.buttonPlay_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(898, 499);
-            this.Controls.Add(this.buttonPlay);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.defaultSongListBox);
             this.Controls.Add(this.songTextBox);
@@ -296,7 +283,6 @@
         private System.Windows.Forms.TextBox songTextBox;
         private System.Windows.Forms.ListBox defaultSongListBox;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button buttonPlay;
     }
 }
 

@@ -122,7 +122,6 @@ namespace Xylo
             time = 0;
             isFirstStroke = true;
             buttonSend.Enabled = false;
-            buttonPlay.Enabled = false;
         }
 
         // This button ends the timer for the intervals between sequences and sets the state
@@ -283,7 +282,6 @@ namespace Xylo
                 songString += $"{noteArr[0]},{noteArr[1]}|";
             }
             songTextBox.Text = "Personalizada";
-            buttonPlay.Enabled = true;
             // Send the song to the Arduino
             arduinoPort.Write(songString);
 
@@ -328,22 +326,6 @@ namespace Xylo
             songTextBox.Text = selected;
             MessageBox.Show($"Canción {selected} enviada al Arduino");
             Enabled = true;
-            buttonPlay.Enabled = true;
-        }
-
-        // Send a message to the Arduino asking him to start playing the given song
-        private void buttonPlay_Click(object sender, EventArgs e)
-        {
-            if (isArduinoPlaying)
-            {
-                arduinoPort.Write("stop");
-                buttonPlay.Text = "Tocar";
-            } else
-            {
-                arduinoPort.Write("play");
-                buttonPlay.Text = "Detener";
-            }
-            isArduinoPlaying = !isArduinoPlaying;
         }
     }
 }
