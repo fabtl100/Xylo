@@ -10,10 +10,10 @@ The circuit is pretty basic, it just has two servo motors connected to an Arduin
 <p align="center"><img src="/imgs/circuit.JPG"><br><b>Circuit</b></p>
 
 ## The Application
-The Windows Application is a Form where the user can play a melody with the keyboard and send it to the Arduino. The software deals with registering the notes and calculating the time between each note played to generate a tuple <i>(n,t)</i> for each note, where <b>n</b> represents the note and <b>t</b> the time between the note and the next note.
+The Windows Application is a Form where the user can play a melody with the keyboard and send it to the Arduino. The software deals with registering the notes and calculating the time between each note played to generate a tuple <b><i>(n,t)</i></b> for each note, where <b>n</b> represents the note and <b>t</b> the time between the note and the next note.
 The UI is simple:
 <p align="center"><img src="/imgs/ui.JPG"><br><b>UI</b></p>
-There are 9 buttons below representing the notes that can be played in the xylohpone. The notes can be played in the software using the keyboard with the keys <b>A</b>, <b>S</b>, <b>D</b>, <b>F</b>, <b>G</b>, <b>H</b>, <b>J</b>, <b>K</b>, <b>L</b> as illustrated in the UI. There is a label that shows the sequence of tuples <i>(n,t)</i> and three more buttons: one to start a new melody, one to send the melody to the Arduino and one to stop playing our current melody (this one can be called with the <b>Z</b> key).
+There are 9 buttons below representing the notes that can be played in the xylohpone. The notes can be played in the software using the keyboard with the keys <b>A</b>, <b>S</b>, <b>D</b>, <b>F</b>, <b>G</b>, <b>H</b>, <b>J</b>, <b>K</b>, <b>L</b> as illustrated in the UI. There is a label that shows the sequence of tuples <b><i>(n,t)</i></b> and three more buttons: one to start a new melody, one to send the melody to the Arduino and one to stop playing our current melody (this one can be called with the <b>Z</b> key).
 
 
 
