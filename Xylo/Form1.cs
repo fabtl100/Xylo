@@ -17,52 +17,6 @@ namespace Xylo
 {
     public partial class Form1 : Form
     {
-        // Pre-defined songs
-        List<int[]> prueba = new List<int[]>() {
-            new int[2]{1,500}, new int[2]{2,500}, new int[2]{3,500}, new int[2]{4,500},
-            new int[2]{5,500}, new int[2]{6,500}, new int[2]{7,500}, new int[2]{8,500}, new int[2]{9,500}
-        };
-        List<int[]> starWars = new List<int[]>() {
-            new int[2]{1,1000},new int[2]{5,1000},new int[2]{4,500},new int[2]{3,500},
-            new int[2]{2,500},new int[2]{8,1000},new int[2]{5,1000},new int[2]{4,500},new int[2]{3,500},
-            new int[2]{2,500},new int[2]{8,1000},new int[2]{5,1000},new int[2]{4,500},new int[2]{3,500},
-            new int[2]{4,500},new int[2]{2,500}
-        };
-
-        List<int[]> cucaracha = new List<int[]>() {
-            new int[2]{1,333},new int[2]{1,333},new int[2]{1,334},new int[2]{4,1000},
-            new int[2]{6,1000},new int[2]{1,333},new int[2]{1,333},new int[2]{1,334},new int[2]{4,1000},
-            new int[2]{ 6,1000},new int[2]{4,500},new int[2]{4,500},new int[2]{3,500},new int[2]{3,500},
-            new int[2]{ 2,500},new int[2]{2,500},new int[2]{1,1000},new int[2]{1,333},new int[2]{1,333},
-            new int[2]{ 1,334},new int[2]{3,1000},new int[2]{5,1000},new int[2]{1,333},new int[2]{1,333},
-            new int[2]{ 1,334},new int[2]{3,1000},new int[2]{5,1000},new int[2]{8,500},new int[2]{9,500},
-            new int[2]{8,500},new int[2]{7,500},new int[2]{6,500},new int[2]{5,500},new int[2]{4,500}
-        };
-        List<int[]> himnoAlegria = new List<int[]> {
-            new int[2]{3,500},new int[2]{3,500},new int[2]{4,500},new int[2]{5,500},
-            new int[2]{ 5,500},new int[2]{4,500},new int[2]{3,500},new int[2]{2,500},new int[2]{1,500},
-            new int[2]{ 1,500},new int[2]{2,500},new int[2]{3,500},new int[2]{3,750},new int[2]{2,300},
-            new int[2]{ 2,1000},new int[2]{3,500},new int[2]{3,500},new int[2]{4,500},new int[2]{5,500},
-            new int[2]{ 5,500},new int[2]{4,500},new int[2]{3,500},new int[2]{2,500},new int[2]{1,500},
-            new int[2]{ 1,500},new int[2]{2,500},new int[2]{3,500},new int[2]{2,750},new int[2]{1,300},
-            new int[2]{ 1,1000},new int[2]{2,1000},new int[2]{3,500},new int[2]{1,500},new int[2]{2,500},
-            new int[2]{ 3,300},new int[2]{4,300},new int[2]{3,500},new int[2]{1,500},new int[2]{2,500},
-            new int[2]{ 3,300},new int[2]{4,300},new int[2]{3,500},new int[2]{2,500},new int[2]{1,500},
-            new int[2]{ 2,500},new int[2]{5,500},new int[2]{3,1000},new int[2]{3,500},new int[2]{4,500},
-            new int[2]{ 5,500},new int[2]{5,500},new int[2]{4,500},new int[2]{3,500},new int[2]{2,500},
-            new int[2]{ 1 ,500},new int[2]{1,500},new int[2]{2,500},new int[2]{3,500},new int[2]{2,750},
-            new int[2]{1,300},new int[2]{1,2000}};
-        List<int[]> estrellita = new List<int[]> {
-            new int[2]{1,500},new int[2]{1,500},new int[2]{5,500},new int[2]{5,500},
-            new int[2]{ 6,500},new int[2]{6,500},new int[2]{5,1000},new int[2]{4,500},new int[2]{4,500},
-            new int[2]{ 3,500},new int[2]{3,500},new int[2]{2,500},new int[2]{2,500},new int[2]{1,1000},
-            new int[2]{ 5,500},new int[2]{5,500},new int[2]{4,500},new int[2]{4,500},new int[2]{3,500},
-            new int[2]{ 3,500},new int[2]{2,1000},new int[2]{5,500},new int[2]{5,500},new int[2]{4,500},
-            new int[2]{ 4,500},new int[2]{3,500},new int[2]{3,500},new int[2]{2,1000},new int[2]{1,500},
-            new int[2]{ 1,500},new int[2]{5,500},new int[2]{5,500},new int[2]{6,500},new int[2]{6,500},
-            new int[2]{ 5,1000},new int[2]{4,500},new int[2]{4,500},new int[2]{3,500},new int[2]{3,500},
-            new int[2]{ 2,500},new int[2]{2,500},new int[2]{1,1000}};
-
         // song will hold the arrays holding the note and the duration of the note
         List<int[]> song;
         // projectDirectory is the path in the computer where the sounds for each note are saved
@@ -77,6 +31,7 @@ namespace Xylo
         bool countingTime;
         // Counter used to jump the line in the label that saves the played notes
         int jumper;
+        int jumperLimit = 7;
         // note holds the played note at a certain time
         int note;
         // arduinoPort is a reference to the serial port object to make the connection and send messages to the Arduino
@@ -104,13 +59,6 @@ namespace Xylo
             jumper           = 0;
             time             = 0;
             note             = 0;
-
-            // Initialize elements in the listbox
-            defaultSongListBox.Items.Add("Prueba");
-            defaultSongListBox.Items.Add("Estrellita");
-            defaultSongListBox.Items.Add("Star Wars");
-            defaultSongListBox.Items.Add("La Cucaracha");
-            defaultSongListBox.Items.Add("Himno Alegria");
         }
 
         // This button restarts the state of all variables so a new song can be played, saved and sent
@@ -141,7 +89,7 @@ namespace Xylo
                 
                 // This logic is used to start a new line in the song sequence label
                 jumper++;
-                if (jumper == 5)
+                if (jumper == jumperLimit)
                 {
                     labelSequence.Text += "\n";
                     jumper = 0;
@@ -169,6 +117,7 @@ namespace Xylo
         // waited in the exact time given to the Task.Delay() method
         private async void play()
         {
+            await Task.Delay(1000);
             foreach (int[] noteArr in song)
             {
                 SoundPlayer player = new SoundPlayer($"{projectDirectory}\\{noteArr[0]}.wav");
@@ -205,7 +154,7 @@ namespace Xylo
                 
                 // This logic is used to start a new line in the song sequence label
                 jumper++;
-                if (jumper == 5)
+                if (jumper == jumperLimit)
                 {
                     labelSequence.Text += "\n";
                     jumper = 0;
@@ -282,7 +231,7 @@ namespace Xylo
             {
                 songString += $"{noteArr[0]},{noteArr[1]}|";
             }
-            songTextBox.Text = "Personalizada";
+            songTextBox.Text = "Yes";
             // Send the song to the Arduino
             arduinoPort.Write(songString);
 
@@ -291,41 +240,6 @@ namespace Xylo
             // Wait for message to be sent, this may need to be adjusted
             await Task.Delay(3000);
             MessageBox.Show($"Canción Personalizada enviada al Arduino");
-            Enabled = true;
-        }
-
-        private async void defaultSongListBox_DoubleClick(object sender, EventArgs e)
-        {
-            string selected = defaultSongListBox.SelectedItem.ToString();
-            List<int[]> songToSend = new List<int[]>();
-
-            switch (selected)
-            {
-                case "Himno Alegria": songToSend = himnoAlegria; break;
-                case "La Cucaracha" : songToSend = cucaracha; break;
-                case "Estrellita"   : songToSend = estrellita; break;
-                case "Star Wars"    : songToSend = starWars; break;
-                case "Prueba"       : songToSend = prueba; break;
-            }
-            // A string will be sent to the Arduino containing the song in the following format: N|n1,t1|...|nm,tm|
-            // where N is the length of the song, nk is a note and tk is a time delay.
-            // First element is N: the length of the song.
-            string songString = $"{songToSend.Count}|";
-
-            // Next elements will be |nk,tk|: the (note, delay) pairs. 
-            foreach (var noteArr in songToSend)
-            {
-                songString += $"{noteArr[0]},{noteArr[1]}|";
-            }
-
-            // Write the song to the Arduino
-            arduinoPort.Write(songString);
-            // Disable the form while waiting for the send of the song to the Arduino
-            Enabled = false;
-            // Wait for message to be sent, this may need to be adjusted
-            await Task.Delay(3000);
-            songTextBox.Text = selected;
-            MessageBox.Show($"Canción {selected} enviada al Arduino");
             Enabled = true;
         }
     }
