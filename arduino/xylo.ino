@@ -1,213 +1,179 @@
 #include <Servo.h>
 #include <stdio.h>
 #include <stdlib.h>
-Servo servo_base;
-Servo servo_brazo; 
+Servo baseServo;
+Servo armServo; 
 
-float **cancion_para_tocar;
-
-String cadena_entrante;
-bool hay_cancion;
-int notas_total;
-
-const int tempo = 1000; // Milisegundos por nota negra
-const int angulos[9] = {6, 10, 15, 18, 23, 27, 30, 33, 37};  // Calibración en grados para cada nota 
+// melody will hold the array with the note,time arrays.
+float **melody;
+// inString will hold the string sent from the software through the serial port.
+String inString;
+// melodySaved helps us to know when a melody is saved in memory so that memory 
+// can be cleaned when a new melody is going to be saved.
+bool melodySaved;
+// Milliseconds by crotchet.
+const int tempo = 1000;
+// Degree calibration for each note. These were obtained empirically.
+const int degrees[9] = {6, 10, 15, 18, 23, 27, 30, 33, 37};
 
 void setup() {
-  
-  servo_base.attach(9);     // Conecta el servo base al pin 9 
-  servo_brazo.attach(10);   // Conecta el servo brazo al pin 10
-
-  // Secuencia para prepararse
-  Serial.println("Preparandose");
-  servo_base.write(angulos[0]);
+  Serial.println("Preparing");
+  // Base servo is connected to the pin #9
+  baseServo.attach(9);
+  // Arm servo is connected to the pin #10
+  armServo.attach(10);
+  // Position base on the first note
+  baseServo.write(degrees[0]);
   delay(500);
-  servo_brazo.write(30);
+  // Position arm being lifted
+  armServo.write(30);
   delay(500);
-
-  //Iniciamos el Serial a 9600 baudios
+  // Starting serial connection at 9600 bauds.
   Serial.begin(9600);
-
-  hay_cancion = false;
-
-  Serial.println("Listo");
+  melodySaved = false;
+  Serial.println("Ready");
 }
 
 void loop() {
-  
   if (Serial.available() > 0) {
-    cadena_entrante = Serial.readString();
-    Serial.println(cadena_entrante);
-
-    Serial.println("Parseando cancion");
-    if (hay_cancion) {
-      liberar_memoria_cancion();
-    }
-    cancion_para_tocar = obtener_cancion(cadena_entrante);
-    Serial.println("Se parseo la cancion: ");
-    notas_total = cancion_para_tocar[0][0];
-    for (int i = 0; i <= notas_total; i++) {
-      Serial.print(cancion_para_tocar[i][0]);
-      Serial.print(",");
-      Serial.print(cancion_para_tocar[i][1]);
-      Serial.print("|");
-    }
-    Serial.println("");
-    hay_cancion = true;
-    
-    Serial.println("Tocando");
-    tocar_cancion();
+    inString = Serial.readString();
+    Serial.println("Parsing melody");
+    melody = parseMelody(inString);
+    Serial.println("Done");
+    melodySaved = true;
+    Serial.println("Playing");
+    play();
   }
 }
 
-// Mueve el brazo encima de las notas para mostrar sus ángulos
-void prueba_calibracion(){
-  servo_brazo.write(21);
-  for(int i=1; i<=9; i=i+1){
-    if(i==6)
-      servo_brazo.write(20);
-    posicionar_nota(i);
-    delay(1000);
-  }
+// Positions arm in the degree that corresponds to the tone.
+void setNote(int tone){
+  baseServo.write(degrees[tone-1]);
 }
 
-// Posiciona el mazo en el ángulo correspondiente al tono
-void posicionar_nota(int tono){
-  int pos;
-  pos = angulos[tono-1]; // -1 porque el arreglo empieza en índice 0
-  servo_base.write(pos);
-}
-
-// Realiza el golpe
-void golpear_nota(int tono){
-  if(tono<6)
-    servo_brazo.write(20);  // Baja
+// Hits the xylophone with the arm.
+void hitNote(int tone){
+  // The last notes require more strength.
+  if(tone<6)
+    armServo.write(20);
   else
-    servo_brazo.write(19);  // Baja más fuerte para las últimas notas
+    armServo.write(19);
   delay(200);
-  servo_brazo.write(30);  // Sube
+  // Lift the arm back up.
+  armServo.write(30);
   delay(10);
 }
 
-// Ciclo para tocar todas las notas en una canción
-void tocar_cancion(){
-  for(int i=1; i<=notas_total; i=i+1){
+void play(){
+  noteCount = melody[0][0];
+  for(int i=1; i<=noteCount; i=i+1){
+    // In the first note we need to prepare in case the arm is positioned
+    // somewhere else.
     if(i==1){
-      posicionar_nota((int)cancion_para_tocar[1][0]);  // Posicionar la primera nota y prepararse
+      setNote((int)melody[1][0]);
       delay(1000);
     } 
-    golpear_nota((int)cancion_para_tocar[i][0]);   // Golpear
-    if(i!=notas_total){
-      posicionar_nota((int)cancion_para_tocar[i+1][0]);  // Se posiciona el mazo a la siguiente nota mientras se espera la duración de la actual
+    hitNote((int)melody[i][0]);
+    if(i!=noteCount){
+      // Position arm in the next note.
+      setNote((int)melody[i+1][0]);
     }
     else{
-      posicionar_nota((int)cancion_para_tocar[1][0]);    // Si ya es la última nota, posicionamos a la primera
+      // In the case of the last note we go back to the first one.
+      setNote((int)melody[1][0]);
     }
-    int duracion = cancion_para_tocar[i][1] * tempo - 210;    // Se toma en cuenta el tiempo perdido durante el golpe
-    delay(duracion);
+    // Time lost in the hit is taken in account here.
+    int duration = melody[i][1] * tempo - 210;
+    delay(duration);
   }
 }
 
-float **obtener_cancion(String str) {
-    // Tamaño de la cadena pasada para ser parseada
-    int tamanoStr = str.length();
-    // Indice para recorrer la cadena
+float **parseMelody(String str) {
+    if (melodySaved) {
+      cleanMelodyMemory();
+    }
+    // Index for the string.
     int i = 0;
-    // En esta cadena se guarda el tamaño de la canción
-    char tamanoCancion[] = "        ";
-
-    // Los primero caracteres corresponden al tamaño de la canción.
-    // Se guardan hasta topar el primer "|" que denota el inicio de 
-    // la secuencia de pares nota,delay
+    // Song length is saved in a string to be cast to int later.
+    char strMelodyLength[] = "        ";
+    // First chars correspond to the song length.
+    // Up until the first '|' where note,time pairs start to appear.
     while (str[i] != '|') {
-        tamanoCancion[i] = str[i];
+        strMelodyLength[i] = str[i];
         i++;
     }
-    // Incrementamos una vez más el contador de la cadena para pasar el "|"
+    // Increment to go past the '|'.
     i++;
-    // Convertimos la cadena que contiene el tamaño a un entero para poder utilizarlo
-    int tamanoCancionInt = atoi(tamanoCancion);
-    
-    // Alojamos memoria bidimensional para tener un arreglo de dos dimensiones dinámico
-    float **cancion = (float**) malloc((tamanoCancionInt+1)*sizeof(float*));
-    // Indice para recorrer los pares contenidos en el arreglo bidimensional
-    int indexCancion = 0;
+    // Cast to int the song length.
+    int melodyLength = atoi(strMelodyLength);
+    // Allocate memory for the array of note,time arrays.
+    float **melody = (float**) malloc((melodyLength+1)*sizeof(float*));
+    // Index for the array of note,time arrays.
+    int melodyIndex = 0;
+    // Allocate memory for first note,time array. 
+    // This one will have the song length in the note position and
+    // no time (0).
+    melody[0] = (float*) malloc(2*sizeof(float));
+    melody[melodyIndex][0] = melodyLength;
+    melody[melodyIndex++][1] = 0;
+    // saveFlag is used to what is being obtained from the string: a note (1) or a time (2).
+    int saveFlag = 1;
+    // Here we do the same we did for the song length but for the time: save in a string
+    // to cast later to an int.
+    char strTime[] = "          ";
+    int timeIndex = 0;
+    int time = 0;
 
-    // Alojamos memoria para el primer par (primer arreglo)
-    // contenido en el arreglo bidimensional
-    cancion[0] = (float*) malloc(2*sizeof(float));
-    // El primer par del arreglo es el tamaño de la canción y un 0 ya que este elemento no es nota
-    // y no necesita ir acompañado de delay
-    cancion[indexCancion][0] = tamanoCancionInt;
-    cancion[indexCancion++][1] = 0;
-    
-    // bandera es usada para saber cuando guardar la nota, o cuando guardar el delay
-    // si la bandera es 1 entonces se guarda la nota, si es 2 se guarda el delay
-    int bandera = 1;
-    // tiempo es usado para guardar el delay caracter por caracter para despues ser 
-    // convertido a un entero. Esto es ya que los delays están compuesto de más de un caracter.
-    char tiempo[] = "          ";
-    int indexTiempo = 0;
-    int tiempoInt = 0;
-
-    for (; i < tamanoStr; i++) {
-        // La coma delimita cuando se termina la nota y comienza el delay
+    for (; i < str.length(); i++) {
+        // ',' separates a note from a time.
         if (str[i] == ',') {
-            bandera = 2;
+            saveFlag = 2;
             continue;
-        // La barra delimita cuando termina el delay y comienza una nota
+        // '|' indicates the start of a new note,time pair.
         } else if (str[i] == '|') {
-            // Como ya se guardaron todos los caracteres del delay se convierte a entero
-            // y se guarda en el par, después de incrementa el contador para comenzar
-            // con el siguiente par nota, delay
-            tiempoInt = atoi(tiempo);
-            indexTiempo = 0;
-            // Normalizamos a 1 los milisegundos (vienen como enteros)
-            cancion[indexCancion++][1] = (float)tiempoInt / 1000;
-            // Se reinicia la variable de tiempo con espacios para usarla de nuevo en la siguiente iteración
-            reiniciar_tiempo(&tiempo[0]);
-            bandera = 1;
-
-            // Esta condicional se asegura que no se aloja memoria para una siguiente nota no existente en la última iteración
+            // Here we have saved all chars for the time. Cast to int and reset index.
+            time = atoi(strTime);
+            timeIndex = 0;
+            // Convert the time to seconds.
+            melody[melodyIndex++][1] = (float)time / 1000;
+            // Reset strTime to hold just spaces again to avoid bugs with leftover digits.
+            resetStrTime(&strTime[0]);
+            saveFlag = 1;
+            // Make sure memory is not allocated for a new pair in the final iteration.
             if (i == (tamanoStr-1)) {
                 break;
             }
             continue;
         }
 
-        // Estamos guardando el delay
-        if (bandera == 2) {
-            // Concatenamos a la variable de delay
-            tiempo[indexTiempo] = str[i];
-            indexTiempo++;
-        // Estamos guardando una nota
-        } else if (bandera == 1) {
-            // Se aloja memoria para este nuevo par
-            cancion[indexCancion] = (float*) malloc(2*sizeof(float));
-            // Se guarda la nota, como la nota es un solo caracter esta lógica se encarga de obtener
-            // un entero y que C no nos regrese el valor ASCII del número en caracter. (Ej. castear '0' a entero devolvería 48)
-            // que es el valor ASCII del caracter '0'.
-            cancion[indexCancion][0] = str[i] - '0';
+        // Saving a time.
+        if (saveFlag == 2) {
+            // Concat to strTime
+            strTime[timeIndex] = str[i];
+            timeIndex++;
+        // Saving a note.
+        } else if (saveFlag == 1) {
+            // Allocate memory for this new note,time pair.
+            melody[melodyIndex] = (float*) malloc(2*sizeof(float));
+            // Save note by casting to int the note. Get the difference between ASCII values because of
+            // the relation ints have withs chars in C.
+            melody[melodyIndex][0] = str[i] - '0';
         }
     }
-    return cancion;
+    return melody;
 }
 
-// Se guarda un espacio en cada posición del arreglo
-// Estos espacios son ignorados al castear a entero, esta es una manera de reiniciar
-// el arreglo de caracteres que utilizamos para guardar los delays
-void reiniciar_tiempo(char *tiempo) {
-    int tamano = strlen(tiempo);
+void resetStrTime(char *strTime) {
+    int tamano = strlen(strTime);
     for (int i = 0; i < tamano; i++) {
-        tiempo[i] = ' ';
+        strTime[i] = ' ';
     }
 }
 
-// Función que sirve para liberar la memoria del puntero doble cancion_para_tocar
-void liberar_memoria_cancion() {
-  int largo = cancion_para_tocar[0][0] + 1;
+void cleanMelodyMemory() {
+  int largo = melody[0][0] + 1;
   for (int i = 0; i < largo; i++) {
-    free(cancion_para_tocar[i]);
+    free(melody[i]);
   }
-  free(cancion_para_tocar);
+  free(melody);
 }
