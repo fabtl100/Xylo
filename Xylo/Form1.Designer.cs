@@ -40,12 +40,9 @@
             this.button9 = new System.Windows.Forms.Button();
             this.buttonTerminate = new System.Windows.Forms.Button();
             this.buttonStart = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.labelSequenceIndicator = new System.Windows.Forms.Label();
             this.labelSequence = new System.Windows.Forms.Label();
             this.buttonSend = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.songTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
@@ -188,30 +185,11 @@
             this.buttonSend.UseVisualStyleBackColor = true;
             this.buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(452, 156);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(88, 13);
-            this.label1.TabIndex = 14;
-            this.label1.Text = "Song in Arduino?";
-            // 
-            // songTextBox
-            // 
-            this.songTextBox.Location = new System.Drawing.Point(479, 172);
-            this.songTextBox.Name = "songTextBox";
-            this.songTextBox.Size = new System.Drawing.Size(30, 20);
-            this.songTextBox.TabIndex = 15;
-            this.songTextBox.Text = "No";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(575, 499);
-            this.Controls.Add(this.songTextBox);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonSend);
             this.Controls.Add(this.labelSequence);
             this.Controls.Add(this.labelSequenceIndicator);
@@ -248,12 +226,9 @@
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Button buttonTerminate;
         private System.Windows.Forms.Button buttonStart;
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label labelSequenceIndicator;
         private System.Windows.Forms.Label labelSequence;
         private System.Windows.Forms.Button buttonSend;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox songTextBox;
     }
 }
 

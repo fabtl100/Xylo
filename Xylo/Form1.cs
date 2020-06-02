@@ -231,7 +231,6 @@ namespace Xylo
             {
                 songString += $"{noteArr[0]},{noteArr[1]}|";
             }
-            songTextBox.Text = "Yes";
             // Send the song to the Arduino
             arduinoPort.Write(songString);
 
