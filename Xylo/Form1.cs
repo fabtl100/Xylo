@@ -67,12 +67,14 @@ namespace Xylo
         List<int[]> song;
         // projectDirectory is the path in the computer where the sounds for each note are saved
         string projectDirectory;
-        // Determines wether the user is starting to play a song or has started already (this is to start the timer the first time)
+        // Determines wether the user is starting to play a song or has started already 
         bool isFirstStroke;
-        // time saves the time in ms counted by the timer between strokes
+        // time saves the time in ms between strokes
         int time;
-        // dateTime is used to calculate time elapsed between timer start and each tick
+        // dateTime is used to calculate time elapsed between notes
         DateTime dateTime;
+        // countingTime if time is being counted or not
+        bool countingTime;
         // Counter used to jump the line in the label that saves the played notes
         int jumper;
         // note holds the played note at a certain time
@@ -98,6 +100,7 @@ namespace Xylo
             // Initialize some variables
             song             = new List<int[]>();
             isFirstStroke    = true;
+            countingTime     = false;
             jumper           = 0;
             time             = 0;
             note             = 0;
@@ -114,24 +117,25 @@ namespace Xylo
         private void buttonStart_Click(object sender, EventArgs e)
         {
             // Set all vars to their default to start with a new song
-            timer1.Stop();
             song = new List<int[]>();
             labelSequence.Text = "";
             jumper = 0;
             time = 0;
             isFirstStroke = true;
+            countingTime = false;
             buttonSend.Enabled = false;
         }
 
-        // This button ends the timer for the intervals between sequences and sets the state
+        // This button ends the time count for the intervals between sequences and sets the state
         // for the song to be sent to the Arduino
         private void buttonTerminate_Click(object sender, EventArgs e)
         {
-            if (timer1.Enabled)
+            if (countingTime)
             {
-                // Finish the song sequence logic: Stop timer, add the last note
+                // Finish the song sequence logic: Stop counting time, add the last note
                 // with its interval and add the last chars to the song sequence label
-                timer1.Stop();
+                TimeSpan timeElapsed = DateTime.Now - dateTime;
+                time = (int)timeElapsed.TotalMilliseconds;
                 song.Add(new int[] { note, time });
                 labelSequence.Text += $",{time}}}]";
                 
@@ -149,6 +153,7 @@ namespace Xylo
                 time = 0;
                 isFirstStroke = true;
                 buttonSend.Enabled = true;
+                countingTime = false;
             }
             else
             {
@@ -183,15 +188,16 @@ namespace Xylo
             }
             if (isFirstStroke)
             {
-                // Start the timer on the first note
-                timer1.Start();
+                // Start counting time on the first note
                 dateTime = DateTime.Now;
                 isFirstStroke = false;
                 labelSequence.Text += "[";
             }
             else
             {
-                timer1.Stop();
+                countingTime = false;
+                TimeSpan timeElapsed = DateTime.Now - dateTime;
+                time = (int)timeElapsed.TotalMilliseconds;
                 // Add the note with its delay to the song list
                 song.Add(new int[] { note, time });
                 // Add the note with its delay to the label showing the sequence
@@ -205,9 +211,9 @@ namespace Xylo
                     jumper = 0;
                 }
 
-                // Restart timer to count a new interval between the recently played note and the next one
+                // Restart time to count a new interval between the recently played note and the next one
                 time = 0;
-                timer1.Start();
+                countingTime = true;
                 dateTime = DateTime.Now;
             }
 
@@ -262,13 +268,6 @@ namespace Xylo
                     labelSequence.Text += "{Bb";
                     note = 9; break;
             }
-        }
-
-        // Increment time delay variable every millisecond the timer is enabled
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            TimeSpan timeElapsed = DateTime.Now - dateTime;
-            time = (int) timeElapsed.TotalMilliseconds;
         }
 
         private async void buttonSend_Click(object sender, EventArgs e)
